@@ -10,3 +10,20 @@ export interface IUser {
   is_seller: boolean;
   created_at: string;
 }
+
+
+export interface IProduct {
+  id: number;
+  seller_id: string;
+  name: string;
+  category: string;
+  price: number;
+  available_stock: number;
+  description: string;
+  created_at: string;
+  images: string[];
+
+  // runtime properties
+  user_profiles: IUser;
+  quantity: number;
+}
