@@ -125,9 +125,33 @@ export const getAllProducts = async({category,searchText,sortBy}:{category:strin
 
   try{
 
+      let orderBy = {
+        column: "created_at",
+        ascending: false,
+      }
+
+      if (sortBy === "price_low_to_high") {
+        orderBy = {
+          column: 'price',
+          ascending: true
+        }
+      }
+
+      if (sortBy === "price_high_to_low") {
+        orderBy = {
+          column : 'price',
+          ascending: false
+        }
+      }
+
     const { data, error } = await supabase
      .from("products")
      .select('*, user_profiles(name)')
+     .ilike('name', `%${searchText}%`)
+     .ilike("category", `%${category}%`)
+     .order(orderBy.column, {
+      ascending: orderBy.ascending
+     })
 
       if (error) {
       throw new Error(error.message);

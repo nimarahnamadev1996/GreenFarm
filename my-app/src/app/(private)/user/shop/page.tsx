@@ -1,15 +1,30 @@
+import React from 'react'
+
+
 import { getAllProducts } from '@/actions/products'
 import PageTitle from '@/components/ui/page-title';
 import { IProduct } from '@/interfaces';
-import React from 'react'
 import ProductTile from './_components/product-tile';
+import Filters from './_components/filters';
 
-const UserShopPage = async() => {
+
+interface UserShopPageProps {
+  searchParams: Promise<{
+    category?: string;
+    searchText?: string;
+    sortBy?: string;
+  }>;
+}
+
+
+const UserShopPage = async({searchParams}: UserShopPageProps) => {
+
+  const { category, searchText, sortBy } = await searchParams
 
   const response: any = await getAllProducts({
-    category: '',
-    searchText: '',
-    sortBy: ''
+    category: category ||'',
+    searchText: searchText || '',
+    sortBy: sortBy || ''
   })
 
   if (!response.success) {
@@ -21,7 +36,7 @@ const UserShopPage = async() => {
 
         <PageTitle title="Shop Products" />
 
-         {/* <Filters/> */}
+         <Filters/>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           {

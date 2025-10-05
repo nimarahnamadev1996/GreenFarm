@@ -1,19 +1,24 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Menu } from 'lucide-react';
+import { Menu, ShoppingCart } from 'lucide-react';
 
 
 import { IUser } from '@/interfaces'
 import logo from '../../../public/hero.png'
 import { Button } from '@/components/ui/button';
 import MenuItems from './menu-items';
+import productsCartStore, { IProductsCartStore } from '@/global-store/products-cart-store';
 
 const Header = ({ user }: { user: IUser }) => {
 
  const [openMenuItems, setOpenMenuItems] = useState(false);
 
+ const { items } = productsCartStore() as IProductsCartStore;
+
  const router = useRouter()
+
+ const totalItemsCount = items.reduce((acc,item) => acc + item.quantity, 0)
 
   return (
     <div className='bg-primary p-5 flex justify-between items-center'>
@@ -27,6 +32,21 @@ const Header = ({ user }: { user: IUser }) => {
 
         <div className="flex items-center gap-5">
             <h1 className="text-sm text-white md:text-md">{user?.name}</h1>
+
+            {
+              totalItemsCount > 0 && (
+                 <div 
+                 className="flex cursor-pointer"
+                 onClick={() => router.push("/user/cart")}>
+                  
+                 <ShoppingCart size={20} className="text-white cursor-pointer" />
+
+                <div className="w-4 h-4 bg-white rounded text-primary flex items-center justify-center text-xs -mt-2 -mr-2">
+                  {totalItemsCount}
+                </div>
+              </div>
+              )
+            }
 
             <Button onClick={() => setOpenMenuItems(true)} size='icon'>
                 <Menu className="text-white cursor-pointer" />
