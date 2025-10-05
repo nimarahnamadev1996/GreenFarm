@@ -294,7 +294,8 @@ const productFormSchema = z.object({
           </Button>
           <Button 
            type="submit" 
-           disabled={loading}>
+           disabled={loading}
+           onClick={() => router.push("/seller/products")}>
             Submit
           </Button>
         </div>

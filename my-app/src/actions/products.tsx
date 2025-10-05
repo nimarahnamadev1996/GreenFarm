@@ -118,3 +118,31 @@ export const deleteProductById = async (productId: number) => {
   }
 };
 
+
+
+
+export const getAllProducts = async({category,searchText,sortBy}:{category:string;searchText:string;sortBy:string;}) => {
+
+  try{
+
+    const { data, error } = await supabase
+     .from("products")
+     .select('*, user_profiles(name)')
+
+      if (error) {
+      throw new Error(error.message);
+      }
+
+      return {
+        success: true,
+        data: data,
+     };
+
+  } catch (error: any) {
+    return {
+      success: false,
+      message: error.message,
+    };
+  }
+
+}
