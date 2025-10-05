@@ -39,3 +39,23 @@ export interface IAddress {
   postal_code: number;
   address: string;
 }
+
+
+export interface IOrderItem {
+  id: number;
+  sub_total: number;
+  tax_shipping_fee: number;
+  total: number;
+  payment_id: string;
+  order_status: string;
+  addresses: IAddress;
+  user_profiles: IUser;
+  order_items: {
+    name: string;
+    price: number;
+    quantity: number;
+    total: number;
+    image: string;
+  }[];
+  created_at: string;
+}

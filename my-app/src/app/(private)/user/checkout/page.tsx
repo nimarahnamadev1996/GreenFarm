@@ -2,6 +2,9 @@
 
 import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
+import { useRouter } from 'next/navigation'
 
 
 
@@ -11,8 +14,14 @@ import usersGlobalStore, { IUsersGlobalStore } from '@/global-store/users-store'
 import productsCartStore, { IProductsCartStore } from '@/global-store/products-cart-store'
 import { IAddress } from '@/interfaces'
 import { Button } from '@/components/ui/button'
-import { useRouter } from 'next/navigation'
 import AddressForm from '../addresses/_components/address-form'
+import { getStripePaymentIntentToken } from '@/actions/payments'
+import CheckoutForm from './_components/checkout-form';
+
+
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ""
+);
 
 
 const UserCheckoutPage = () => {
@@ -21,7 +30,8 @@ const UserCheckoutPage = () => {
    const [addresses, setAddresses] = useState([])
    const [selectedAddress, setSelectedAddress] = useState<IAddress | null>(null)
    const [openAddressForm, setOpenAddressForm] = useState(false);
-
+   const [paymentIntentToken, setPaymentIntentToken] = useState("");
+   const [openCheckoutForm, setOpenCheckoutForm] = useState(false);
 
 
    const router = useRouter()
@@ -59,6 +69,37 @@ const UserCheckoutPage = () => {
 
    total = parseFloat((subTotal + deliveryFeeAndTax).toFixed(2));
 
+
+   
+  const onCheckout = async () => {
+    try {
+      setLoading(true);
+      const response = await getStripePaymentIntentToken(total);
+      if (!response.success) {
+        console.log(response);
+        toast.error("Failed to checkout");
+        return;
+      }
+      setPaymentIntentToken(response.data);
+      console.log(response.data);
+      
+      setOpenCheckoutForm(true);
+    } catch (error) {
+      toast.error("Failed to checkout");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  const onPaymentSuccess = async (paymentId: string) => {
+
+  }
+
+    const options = {
+    // passing the client secret obtained from the server
+    clientSecret: paymentIntentToken,
+  };
   
 
   return (
@@ -106,7 +147,7 @@ const UserCheckoutPage = () => {
         <Button variant={"outline"} onClick={() => router.push("/user/cart")}>
           Back to cart
         </Button>
-        <Button disabled={!selectedAddress || loading}>
+        <Button disabled={!selectedAddress || loading} onClick={onCheckout}>
           Proceed to payment
         </Button>
       </div>
@@ -119,6 +160,18 @@ const UserCheckoutPage = () => {
            setOpenAddressForm={setOpenAddressForm}/>
         )
       }
+
+
+      
+      {openCheckoutForm && (
+        <Elements stripe={stripePromise} options={options}>
+          <CheckoutForm
+            openCheckoutForm={openCheckoutForm}
+            setOpenCheckoutForm={setOpenCheckoutForm}
+            onPaymentSuccess={onPaymentSuccess}
+          />
+        </Elements>
+      )}
 
     </div>
   )
